@@ -1,0 +1,11 @@
+Initially the design contained the possibility to use a shared memory 
+segment for communication to a render backend on a global server such
+that all data structures including vertex data etc would be exported
+to the server and all other authorized programs (read-only in this case)
+without any rendering performed on the client side. This would have
+enabled the server to perform interesting effects with the geometry 
+etc. The downside proved to be the much more complicated and limited
+implementation options that come with the lack of pointers in
+shared memory and additionally the extra effort correlated to the
+access control to these segments (read-write for the server, read-only
+to other selected processes of the same user)

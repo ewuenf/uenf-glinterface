@@ -31,7 +31,7 @@ class Node
 {
 public:    
   std::weak_ptr<Node> const & getParent() const { return parent; }
-  void getParent(std::weak_ptr<Node> const & parentArg) { parent = parentArg; }
+  void setParent(std::weak_ptr<Node> const & parentArg) { parent = parentArg; }
   
   #ifdef UENF_GLINTERFACE_TRYTYPEFIELD
   Node(NodeType const & typeArg = NodeType::None):type(typeArg){}

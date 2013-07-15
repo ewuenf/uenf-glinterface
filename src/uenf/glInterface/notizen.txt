@@ -1,0 +1,4 @@
+Buffer und BufferViews mit Iteratoren wie synchronisieren?
+
+  Reallocations bei Einfügen in Context mit shared mem?
+  Falls von vector ableiten, was ist mit modifizierenden Funktionen wie insert?
