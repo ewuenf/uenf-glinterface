@@ -66,8 +66,27 @@ class NodeInterface
   virtual ~NodeInterface(){}
   virtual void update() {}
   virtual void execute() {}
-  virtual std::vector<Context> const & collectContexts() {return std::vector<Context>();}
 }
+
+
+class SingleContextReferrer
+{  
+  virtual Context & getContext() = 0;
+}
+
+
+class MultiContextReferrer
+{  
+  std::vector<Context> & getContexts() = 0;
+}
+
+
+class NodesToUpdate : public Event
+{
+  void add(SingleContextReferrer);
+  void add(MultiContextReferrer);
+}
+
 
 class NodeBase<T> : public NodeInterface
 {
@@ -92,12 +111,21 @@ class Node<T> : public NodeBase<T>
 class MultiParentNode<T> : public NodeBase<T>
 {
   std::vector<weak_ptr<NodeInterface>> parents;  
+  std::vector<Context> contexts; // cache
+  
   std::vector<Context> const & collectContexts()
   {
+    if(parents.empty())
+      return {};
+    std::vector<Context> contexts;
     // iterate over parents!
-    Context * ptr = dynamic_cast<Context *>(parent.lock().get());
-    if(ptr) return {ptr}; 
-    else    return ptr->collectContexts();
+    for(auto parent: parents)
+    {
+      Context * ptr = dynamic_cast<Context *>(parent.lock().get());
+      if(ptr) return {ptr}; 
+      else    return ptr->collectContexts();      
+    }
+    return contexts;
   }
 }
 
