@@ -52,7 +52,7 @@ class Triangle/Line/PointIterator<typename BufferType>
 {
   typedef typename BufferType::iterator it;
 
-  it internalPointer; // increments by 3/2/1
+  it internalPointer; // increments by 3/2/1 (depends also on storage type of triangle or lines!)
 
   // for triangle
   T & first/second/thirdEdge();
