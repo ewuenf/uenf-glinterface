@@ -69,13 +69,19 @@ class NodeInterface
 }
 
 
-class SingleContextReferrer
+class SingleContextReferrer : public NodeInterface
 {  
-  virtual Context & getContext() = 0;
+  weak_ptr<NodeInterface> parent;  
+  std::vector<Context> const & getContext() //  maybe virtual?
+  {
+    Context * ptr = dynamic_cast<Context *>(parent.lock().get());
+    if(ptr) return {ptr}; 
+    else    return ptr->collectContexts();
+  }
 }
 
 
-class MultiContextReferrer
+class MultiContextReferrer : public NodeInterface
 {  
   std::vector<Context> & getContexts() = 0;
 }
@@ -88,24 +94,17 @@ class NodesToUpdate : public Event
 }
 
 
-class NodeBase<T> : public NodeInterface
+template < class T, 
+           class PtrType = shared_ptr<T>, 
+           class ReferrerType = SingleContextReferrer
+         >
+         Node : public ReferrerType
 {
-  shared_ptr<T> t;
-  void update() {t->update();}
-  void execute() {t->execute();}
+  PtrType objectPtr;
+  void update()  {objectPtr->update();}
+  void execute() {objectPtr->execute();}
 }
 
-
-class Node<T> : public NodeBase<T>
-{
-  weak_ptr<NodeInterface> parent;  
-  std::vector<Context> const & collectContexts()
-  {
-    Context * ptr = dynamic_cast<Context *>(parent.lock().get());
-    if(ptr) return {ptr}; 
-    else    return ptr->collectContexts();
-  }
-}
 
 
 class MultiParentNode<T> : public NodeBase<T>
@@ -113,7 +112,7 @@ class MultiParentNode<T> : public NodeBase<T>
   std::vector<weak_ptr<NodeInterface>> parents;  
   std::vector<Context> contexts; // cache
   
-  std::vector<Context> const & collectContexts()
+  std::vector<Context> const & getContexts()
   {
     if(parents.empty())
       return {};
@@ -130,6 +129,12 @@ class MultiParentNode<T> : public NodeBase<T>
 }
 
 
+was bedeutet das update einer Node in mehreren Contexten (nach dem ersten Update ist es ja überall gleich
+und andererseits muss das update selbst synchronisiert sein (alle Kontexte brauchen eine Barrier)
 
+Das Ein- und Austragen von Nodes in die Baumstruktur erfordert evtl die Anpassung der betroffenen Contexte
+pro Node (für die Kinder des Nodes), falls ein Sync-Objekt direkt auf dem Node generiert werden kann, falls
+dieses Sync-Objekt sich die Contexte einsammelt (Visitor-Pattern!), dann ist dies nicht nötig. Jedoch dann,
+falls Sync-Objekte schon existieren (immer nur einmal generieren?)
 
 
