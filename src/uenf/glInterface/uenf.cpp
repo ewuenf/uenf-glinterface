@@ -171,17 +171,44 @@ public:  // use composition here
 
 
 
+// DrawableCategory associates a drawable that is the one behind all gui elements of that category
+// This is just needed for organization of drawables in gui-library
+enum DrawableCategory : uint16 {
+  Splash,
+  Background,
+  Button,
+  Menu,
+  TextLabel,        // has a string-based map identifying subcategories depending on the font (and thus the associated texture) 
+  User = (2 << 12)  // free category for library extensions by users, implies a string-based map too 
+}
+
+class DrawableCategoryIndex
+{
+  DrawableCategory category;
+  int16 subIndex;
+};
+
+
 // The "NAME"! flat axis-aligned quad (oder auch Kuhflaad ;-) )  
 // This would be the base class for all GUI elements (recursivly), as it is a frame essentially,
 // that could host a button, an image, a text box, etc...
-class FlaadInterface;
-template <enum FlaadCategory> class Flaad : public FlaadInterface
+class FlaadInterface
+{};
+
+class Flaad : public FlaadInterface
 {
+public:
+  DrawableCategoryIndex const drawableCategoryIndex;
+  
   every Flaad of a certain type just refers to subindices of a common Buffer in a Drawable (drawing Triangles)
   of the given FlaadCategory, the Drawable is then responsible for the appereance of
   all associated Flaads, thus setting the values for this Drawable changes the
   appereance of all associated Flaads in a central place, which is what we want
-}
+};
+
+class TextFlaad;
+class ButtonFlaad; // has a TextFlaad contained
+class TabFlaad;
 
 
 
